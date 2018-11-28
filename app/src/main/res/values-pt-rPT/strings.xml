@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ReversISEC</string>
+    <string name="credits">Créditos</string>
+    <string name="viewProfile">Ver Perfil</string>
+    <string name="pvp">Jogador Vs Jogador</string>
+    <string name="pvcom">Jogador Vs COM</string>
+</resources>
