@@ -8,17 +8,23 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.TextView;
 
 import pedrofranco6.tp_amov.GameActivity;
+import pedrofranco6.tp_amov.R;
 
 public class TabuleiroView extends View {
-    private static final int LINE_THICK = 5;
-    private static final int ELT_MARGIN = 20;
-    private static final int ELT_STROKE_WIDTH = 15;
-    private int width, height, eltW, eltH;
-    private Paint gridPaint, oPaint, xPaint;
+
+    private static final int boardSize = 8;
+
+    private static final int LINE_THICK = 4;
+    private static final int DISC_MARGIN = 8;
+    private int width, height, discW, discH;
+    private Paint gridPaint, p1Paint, p2Paint;
     private GameEngine gameEngine;
     private GameActivity activity;
+    private int gameMode;
+    private TextView pecasP1, pecasP2;
 
     public TabuleiroView(Context context) {
         super(context);
@@ -27,16 +33,19 @@ public class TabuleiroView extends View {
     public TabuleiroView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         gridPaint = new Paint();
-        oPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        oPaint.setColor(Color.RED);
-        oPaint.setStyle(Paint.Style.STROKE);
-        oPaint.setStrokeWidth(ELT_STROKE_WIDTH);
-        xPaint = new Paint(oPaint);
-        xPaint.setColor(Color.BLUE);
+        p1Paint = new Paint();
+        p1Paint.setColor(Color.BLACK);
+        p2Paint = new Paint();
+        p2Paint.setColor(Color.GREEN);
     }
 
-    public void setGameActivity(GameActivity a) {
+    public void setMainActivity(GameActivity a, int g, TextView p1, TextView p2) {
         activity = a;
+        gameMode = g;
+        pecasP1 = p1;
+        pecasP1.setText(Integer.toString(gameEngine.getCountDiscs(gameEngine.PLAYER_1)));
+        pecasP2 = p2;
+        pecasP2.setText(Integer.toString(gameEngine.getCountDiscs(gameEngine.PLAYER_2)));
     }
 
     public void setGameEngine(GameEngine g) {
@@ -47,8 +56,8 @@ public class TabuleiroView extends View {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         height = View.MeasureSpec.getSize(heightMeasureSpec);
         width = View.MeasureSpec.getSize(widthMeasureSpec);
-        eltW = (width - LINE_THICK) / 3;
-        eltH = (height - LINE_THICK) / 3;
+        discW = (width - LINE_THICK) / boardSize;
+        discH = (height - LINE_THICK) / boardSize;
 
         setMeasuredDimension(width, height);
     }
@@ -61,40 +70,36 @@ public class TabuleiroView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (!gameEngine.isEnded()  &&  event.getAction() == MotionEvent.ACTION_DOWN) {
-            int x = (int) (event.getX() / eltW);
-            int y = (int) (event.getY() / eltH);
-            char win = gameEngine.play(x, y);
-            invalidate();
+        int x = (int) (event.getX() / discW);
+        int y = (int) (event.getY() / discH);
 
-            if (win != ' ') {
-                activity.gameEnded(win);
-            } else {
-                // computer plays ...
-                win = gameEngine.computer();
-                invalidate();
-
-                if (win != ' ') {
-                    activity.gameEnded(win);
-                }
+        if (gameMode == 0 || ((gameMode == 1 || gameMode == 2) && gameEngine.getCurrentPlayer() == gameEngine.PLAYER_1)) {
+            if (gameEngine.isValidPlay(x, y)) {
+                gameEngine.play(x, y);
+                pecasP1.setText(Integer.toString(gameEngine.getCountDiscs(gameEngine.PLAYER_1)));
+                pecasP2.setText(Integer.toString(gameEngine.getCountDiscs(gameEngine.PLAYER_2)));
+                if (gameEngine.checkGameEnd())
+                    activity.gameEnded(gameEngine.getWinner());
             }
         }
 
+        invalidate();
         return super.onTouchEvent(event);
     }
 
     private void drawBoard(Canvas canvas) {
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                drawElt(canvas, gameEngine.getElt(i, j), i, j);
+        for (int i = 0; i < boardSize; i++) {
+            for (int j = 0; j < boardSize; j++) {
+                if (gameEngine.getDisc(i, j) != 0)
+                    drawDisc(canvas, i, j);
             }
         }
     }
 
     private void drawGrid(Canvas canvas) {
-        for (int i = 0; i < 2; i++) {
+        for (int i = -1; i < boardSize; i++) {
             // vertical lines
-            float left = eltW * (i + 1);
+            float left = discW * (i + 1);
             float right = left + LINE_THICK;
             float top = 0;
             float bottom = height;
@@ -104,34 +109,28 @@ public class TabuleiroView extends View {
             // horizontal lines
             float left2 = 0;
             float right2 = width;
-            float top2 = eltH * (i + 1);
+            float top2 = discH * (i + 1);
             float bottom2 = top2 + LINE_THICK;
 
             canvas.drawRect(left2, top2, right2, bottom2, gridPaint);
         }
     }
 
-    private void drawElt(Canvas canvas, char c, int x, int y) {
-        if (c == 'O') {
-            float cx = (eltW * x) + eltW / 2;
-            float cy = (eltH * y) + eltH / 2;
+    private void drawDisc(Canvas canvas, int x, int y) {
+        float xx = (discW * x) + discW / 2;
+        float yy = (discH * y) + discH / 2;
 
-            canvas.drawCircle(cx, cy, Math.min(eltW, eltH) / 2 - ELT_MARGIN * 2, oPaint);
+        if (gameEngine.getDisc(x, y) == GameEngine.PLAYER_1)
+            canvas.drawCircle(xx, yy, Math.min(discW, discH) / 2 - DISC_MARGIN * 2, p1Paint);
+        else
+            canvas.drawCircle(xx, yy, Math.min(discW, discH) / 2 - DISC_MARGIN * 2, p2Paint);
+    }
 
-        } else if (c == 'X') {
-            float startX = (eltW * x) + ELT_MARGIN;
-            float startY = (eltH * y) + ELT_MARGIN;
-            float endX = startX + eltW - ELT_MARGIN * 2;
-            float endY = startY + eltH - ELT_MARGIN;
+    public TextView getPecasP1() {
+        return pecasP1;
+    }
 
-            canvas.drawLine(startX, startY, endX, endY, xPaint);
-
-            float startX2 = (eltW * (x + 1)) - ELT_MARGIN;
-            float startY2 = (eltH * y) + ELT_MARGIN;
-            float endX2 = startX2 - eltW + ELT_MARGIN * 2;
-            float endY2 = startY2 + eltH - ELT_MARGIN;
-
-            canvas.drawLine(startX2, startY2, endX2, endY2, xPaint);
-        }
+    public TextView getPecasP2() {
+        return pecasP2;
     }
 }

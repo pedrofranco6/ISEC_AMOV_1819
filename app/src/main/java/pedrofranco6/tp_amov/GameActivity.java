@@ -4,46 +4,37 @@ import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.TextView;
 
 import pedrofranco6.tp_amov.Game.GameEngine;
 import pedrofranco6.tp_amov.Game.TabuleiroView;
 
-import static pedrofranco6.tp_amov.R.id.tab;
+import static pedrofranco6.tp_amov.R.id.tabuleiro;
 
 public class GameActivity extends AppCompatActivity {
 
-    private TabuleiroView view;
-    public GameEngine gameEngine;
+    private TabuleiroView tabuleiroView;
+    private GameEngine gameEngine;
+    private int gameMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        view = (TabuleiroView) findViewById(tab);
-        gameEngine = new GameEngine();
-        view.setGameEngine(gameEngine);
-        view.setGameActivity(this);
+        setContentView(R.layout.activity_game);
+
+        Bundle bundle = getIntent().getExtras();
+        gameMode = bundle.getInt("gameMode");
+
+        tabuleiroView = findViewById(tabuleiro);
+        gameEngine = new GameEngine(gameMode);
+        tabuleiroView.setGameEngine(gameEngine);
+        tabuleiroView.setMainActivity(this, gameMode, (TextView) findViewById(R.id.pecasP1), (TextView) findViewById(R.id.pecasP2));
     }
 
-    /*@Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        return super.onCreateOptionsMenu(menu);
-    }*/
+    public void gameEnded(int player) {
+        String msg = (player == 0) ? "Game Ended. Tie" : "GameEnded. P" + player + " win";
 
-    /*@Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_new_game) {
-            newGame();
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-*/
-    public void gameEnded(char c) {
-        String msg = (c == 'T') ? "Game Ended. Tie" : "GameEnded. " + c + " win";
-
-        new AlertDialog.Builder(this).setTitle("Tic Tac Toe").
+        new AlertDialog.Builder(this).setTitle("Reversi").
                 setMessage(msg).
                 setOnDismissListener(new DialogInterface.OnDismissListener() {
                     @Override
@@ -55,6 +46,9 @@ public class GameActivity extends AppCompatActivity {
 
     private void newGame() {
         gameEngine.newGame();
-        view.invalidate();
+        tabuleiroView.getPecasP1().setText(Integer.toString(gameEngine.getCountDiscs(gameEngine.PLAYER_1)));
+        tabuleiroView.getPecasP2().setText(Integer.toString(gameEngine.getCountDiscs(gameEngine.PLAYER_2)));
+
+        tabuleiroView.invalidate();
     }
 }

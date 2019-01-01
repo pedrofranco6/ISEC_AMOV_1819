@@ -5,4 +5,8 @@
     <string name="viewProfile">View Profile</string>
     <string name="pvp">Player Vs Player</string>
     <string name="pvcom">Player Vs COM</string>
+    <string name="pvai">Player Vs AI</string>
+    <string name="autores">App done by:</string>
+    <string name="unidadeCurricular">Subject:</string>
+    <string name="curso">Degree</string>
 </resources>

@@ -5,4 +5,8 @@
     <string name="viewProfile">Ver Perfil</string>
     <string name="pvp">Jogador Vs Jogador</string>
     <string name="pvcom">Jogador Vs COM</string>
+    <string name="pvai">Jogador Vs IA</string>
+    <string name="autores">Trabalho realizado por:</string>
+    <string name="unidadeCurricular">Unidade Curricular:</string>
+    <string name="curso">Curso</string>
 </resources>

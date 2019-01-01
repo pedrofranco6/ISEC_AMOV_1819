@@ -13,6 +13,24 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
     }
 
+    public void jogoPvP(View v) {
+        Intent intent = new Intent(MainActivity.this, GameActivity.class);
+        intent.putExtra("gameMode", 0);
+        startActivity(intent);
+    }
+
+    public void jogoPvCOM(View v) {
+        Intent intent = new Intent(MainActivity.this, GameActivity.class);
+        intent.putExtra("gameMode", 1);
+        startActivity(intent);
+    }
+
+    public void jogoPvAI(View v) {
+        Intent intent = new Intent(MainActivity.this, GameActivity.class);
+        intent.putExtra("gameMode", 2);
+        startActivity(intent);
+    }
+
     public void criarPerfil(View v) {
         Intent intent = new Intent(MainActivity.this, PerfilActivity.class);
         startActivity(intent);
@@ -20,11 +38,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void verCreditos(View v) {
         Intent intent = new Intent(MainActivity.this, CreditsActivity.class);
-        startActivity(intent);
-    }
-
-    public void jogoPvP(View v) {
-        Intent intent = new Intent(MainActivity.this, GameActivity.class);
         startActivity(intent);
     }
 }
